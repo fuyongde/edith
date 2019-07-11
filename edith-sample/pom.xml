@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.stark</groupId>
+        <artifactId>edith-parent</artifactId>
+        <version>0.1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>edith-sample</artifactId>
+    <name>edith-sample</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>edith-sample-api</module>
+        <module>edith-sample-provider</module>
+        <module>edith-sample-consumer</module>
+    </modules>
+</project>
