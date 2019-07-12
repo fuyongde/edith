@@ -10,6 +10,8 @@ public class HelloServiceImpl implements HelloService {
 
     @Override
     public String hello(String name) {
-        return "Hello " + name;
+        String result = "Hello " + name;
+        System.out.println(Thread.currentThread().getName() + " " + result);
+        return result;
     }
 }
