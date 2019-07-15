@@ -57,8 +57,11 @@ public class RpcFramework {
                         Class<?>[] parameterTypes = (Class<?>[]) input.readObject();
                         Object[] arguments = (Object[]) input.readObject();
                         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                        Object service = SERVICE_MAP.get(interfaceName);
+                        if (Objects.isNull(service)) {
+                            output.writeObject(new RuntimeException("No such service : " + interfaceName));
+                        }
                         try {
-                            Object service = SERVICE_MAP.get(interfaceName);
                             Method method = service.getClass().getMethod(methodName, parameterTypes);
                             Object result = method.invoke(service, arguments);
                             output.writeObject(result);
