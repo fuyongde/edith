@@ -30,7 +30,7 @@ public class RpcFramework {
 
     private static final ExecutorService executorService = ThreadUtils.newCachedThreadPool(0);
 
-    private static final Map<String, Object> serviceMap = Maps.newHashMap();
+    private static final Map<String, Object> SERVICE_MAP = Maps.newHashMap();
 
     public static void export(final List<Object> services, int port) throws Exception {
         if (CollectionUtils.isEmpty(services)) {
@@ -41,7 +41,7 @@ public class RpcFramework {
         }
         services.forEach(service -> System.out.println("Export service " + service.getClass().getName() + " on port " + port));
         services.forEach(service -> Stream.of(service.getClass().getInterfaces())
-                .forEach(o -> serviceMap.put(o.getName(), service)));
+                .forEach(o -> SERVICE_MAP.put(o.getName(), service)));
 
         ServerSocket server = new ServerSocket(port);
         for (; ; ) {
@@ -56,7 +56,7 @@ public class RpcFramework {
                         Object[] arguments = (Object[]) input.readObject();
                         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                         try {
-                            Object service = serviceMap.get(interfaceName);
+                            Object service = SERVICE_MAP.get(interfaceName);
                             Method method = service.getClass().getMethod(methodName, parameterTypes);
                             Object result = method.invoke(service, arguments);
                             output.writeObject(result);
