@@ -1,6 +1,7 @@
 package com.stark.edith.core;
 
-import com.google.common.base.Strings;
+import com.stark.edith.core.util.CollectionUtils;
+import com.stark.edith.core.util.StringUtils;
 import com.stark.edith.core.util.ThreadUtils;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 
@@ -24,16 +26,16 @@ public class RpcFramework {
 
     private static final ExecutorService executorService = ThreadUtils.newCachedThreadPool(0);
 
-    public static void export(final Object service, int port) throws Exception {
-        Objects.requireNonNull(service, "Service instance is null!");
-
+    public static void export(final List<Object> services, int port) throws Exception {
+        if (CollectionUtils.isEmpty(services)) {
+            throw new IllegalArgumentException("Collection services is empty");
+        }
         if (port <= PORT_MIN || port > PORT_MAX) {
             throw new IllegalArgumentException("Invalid port " + port);
         }
-        System.out.println("Export service " + service.getClass().getName() + " on port " + port);
+        services.forEach(service -> System.out.println("Export service " + service.getClass().getName() + " on port " + port));
         ServerSocket server = new ServerSocket(port);
         for (; ; ) {
-            System.out.println("application is running");
             Socket socket = server.accept();
             executorService.execute(() -> {
                 try {
@@ -43,9 +45,14 @@ public class RpcFramework {
                         Object[] arguments = (Object[]) input.readObject();
                         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                         try {
-                            Method method = service.getClass().getMethod(methodName, parameterTypes);
-                            Object result = method.invoke(service, arguments);
-                            output.writeObject(result);
+                            for (Object service : services) {
+                                try {
+                                    Method method = service.getClass().getMethod(methodName, parameterTypes);
+                                    Object result = method.invoke(service, arguments);
+                                    output.writeObject(result);
+                                } catch (NoSuchMethodException ignored) {
+                                }
+                            }
                         } catch (Throwable t) {
                             output.writeObject(t);
                         } finally {
@@ -71,7 +78,7 @@ public class RpcFramework {
         if (!interfaceClass.isInterface()) {
             throw new IllegalArgumentException("The " + interfaceClass.getName() + " must be interface class!");
         }
-        if (Strings.isNullOrEmpty(host)) {
+        if (StringUtils.isNullOrEmpty(host)) {
             throw new IllegalArgumentException("Host is null!");
         }
         if (port <= PORT_MIN || port > PORT_MAX) {

@@ -1,6 +1,7 @@
 package com.stark.edith.sample.consumer;
 
 import com.stark.edith.core.RpcFramework;
+import com.stark.edith.sample.api.DroneService;
 import com.stark.edith.sample.api.HelloService;
 
 /**
@@ -12,5 +13,9 @@ public class Consumer {
         HelloService helloService = RpcFramework.refer(HelloService.class, "127.0.0.1", 8888);
         String name = "Peter Parker";
         System.out.println(helloService.hello(name));
+
+        DroneService droneService = RpcFramework.refer(DroneService.class, "127.0.0.1", 8888);
+        String target = "Peter Parker";
+        System.out.println(droneService.attack(target));
     }
 }
