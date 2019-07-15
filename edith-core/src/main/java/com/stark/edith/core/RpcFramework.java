@@ -31,6 +31,8 @@ public class RpcFramework {
     private static final ExecutorService executorService = ThreadUtils.newCachedThreadPool(0);
 
     private static final Map<String, Object> SERVICE_MAP = Maps.newHashMap();
+    private static final String INTERFACE_NAME = "interfaceName";
+    private static final String METHOD_NAME = "methodName";
 
     public static void export(final List<Object> services, int port) throws Exception {
         if (CollectionUtils.isEmpty(services)) {
@@ -50,8 +52,8 @@ public class RpcFramework {
                 try {
                     try (ObjectInputStream input = new ObjectInputStream(socket.getInputStream())) {
                         String interfaceAndMethod = input.readUTF();
-                        String interfaceName = JSON.parseObject(interfaceAndMethod).getString("interfaceName");
-                        String methodName = JSON.parseObject(interfaceAndMethod).getString("methodName");
+                        String interfaceName = JSON.parseObject(interfaceAndMethod).getString(INTERFACE_NAME);
+                        String methodName = JSON.parseObject(interfaceAndMethod).getString(METHOD_NAME);
                         Class<?>[] parameterTypes = (Class<?>[]) input.readObject();
                         Object[] arguments = (Object[]) input.readObject();
                         ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
@@ -97,8 +99,8 @@ public class RpcFramework {
             try (Socket socket = new Socket(host, port)) {
                 try (ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream())) {
                     Map<String, String> interfaceAndMethod = Maps.newHashMap();
-                    interfaceAndMethod.put("interfaceName", interfaceClass.getName());
-                    interfaceAndMethod.put("methodName", method.getName());
+                    interfaceAndMethod.put(INTERFACE_NAME, interfaceClass.getName());
+                    interfaceAndMethod.put(METHOD_NAME, method.getName());
                     output.writeUTF(JSON.toJSONString(interfaceAndMethod));
                     output.writeObject(method.getParameterTypes());
                     output.writeObject(arguments);
