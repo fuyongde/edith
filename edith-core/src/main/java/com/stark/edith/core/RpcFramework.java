@@ -3,7 +3,6 @@ package com.stark.edith.core;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.stark.edith.core.annotation.Service;
-import com.stark.edith.core.util.CollectionUtils;
 import com.stark.edith.core.util.StringUtils;
 import com.stark.edith.core.util.ThreadUtils;
 import org.reflections.Reflections;
@@ -132,22 +131,7 @@ public class RpcFramework {
         });
     }
 
-    public static Set<Object> initAllServices(String[] packageNames) {
-        Set<Class<?>> services = getAllServiceClass(packageNames);
-        if (CollectionUtils.isEmpty(services)) {
-            return null;
-        }
-        return services.stream().map(clazz -> {
-            try {
-                return clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                System.err.println("new instance fail, class : " + clazz.getName() + ", exception : " + e.getMessage());
-                return null;
-            }
-        }).collect(Collectors.toSet());
-    }
-
-    private static Set<Class<?>> getAllServiceClass(String[] packageNames) {
+    private static Set<Object> initAllServices(String[] packageNames) {
         if (Objects.isNull(packageNames) || packageNames.length == 0) {
             return null;
         }
@@ -155,6 +139,13 @@ public class RpcFramework {
         return Stream.of(packageNames)
                 .map(packageName -> new Reflections(packageName))
                 .flatMap(reflections -> reflections.getTypesAnnotatedWith(Service.class).stream())
+                .map(clazz -> {
+                    try {
+                        return clazz.newInstance();
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .collect(Collectors.toSet());
     }
 }
