@@ -2,9 +2,11 @@ package com.stark.edith.core;
 
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
+import com.stark.edith.core.annotation.Service;
 import com.stark.edith.core.util.CollectionUtils;
 import com.stark.edith.core.util.StringUtils;
 import com.stark.edith.core.util.ThreadUtils;
+import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,10 +15,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.stark.edith.core.constant.RpcConstants.PORT_MAX;
@@ -34,16 +38,25 @@ public class RpcFramework {
     private static final String INTERFACE_NAME = "interfaceName";
     private static final String METHOD_NAME = "methodName";
 
-    public static void export(final List<Object> services, int port) throws Exception {
-        if (CollectionUtils.isEmpty(services)) {
-            throw new IllegalArgumentException("Collection services is empty");
+    public static void export(String[] packageNames, int port) throws Exception {
+        if (Objects.isNull(packageNames) || packageNames.length == 0) {
+            throw new IllegalArgumentException("PackageNames is empty");
         }
         if (port <= PORT_MIN || port > PORT_MAX) {
             throw new IllegalArgumentException("Invalid port " + port);
         }
+        Set<Object> services = Optional
+                .ofNullable(initAllServices(packageNames))
+                .orElseThrow(() -> new RuntimeException("There is no service with com.stark.edith.core.annotation.Service"));
         services.forEach(service -> System.out.println("Export service " + service.getClass().getName() + " on port " + port));
-        services.forEach(service -> Stream.of(service.getClass().getInterfaces())
-                .forEach(o -> SERVICE_MAP.put(o.getName(), service)));
+        services.stream()
+                //若存在注解且要将服务进行暴露，则返回true
+                .filter(service -> {
+                    Service annotation = service.getClass().getAnnotation(Service.class);
+                    return Objects.nonNull(annotation) && annotation.export();
+                })
+                //将服务按照 key=interfaceName，value=implObject的方式进行存储
+                .forEach(service -> Stream.of(service.getClass().getInterfaces()).forEach(o -> SERVICE_MAP.put(o.getName(), service)));
 
         ServerSocket server = new ServerSocket(port);
         for (; ; ) {
@@ -117,5 +130,31 @@ public class RpcFramework {
                 }
             }
         });
+    }
+
+    public static Set<Object> initAllServices(String[] packageNames) {
+        Set<Class<?>> services = getAllServiceClass(packageNames);
+        if (CollectionUtils.isEmpty(services)) {
+            return null;
+        }
+        return services.stream().map(clazz -> {
+            try {
+                return clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                System.err.println("new instance fail, class : " + clazz.getName() + ", exception : " + e.getMessage());
+                return null;
+            }
+        }).collect(Collectors.toSet());
+    }
+
+    private static Set<Class<?>> getAllServiceClass(String[] packageNames) {
+        if (Objects.isNull(packageNames) || packageNames.length == 0) {
+            return null;
+        }
+
+        return Stream.of(packageNames)
+                .map(packageName -> new Reflections(packageName))
+                .flatMap(reflections -> reflections.getTypesAnnotatedWith(Service.class).stream())
+                .collect(Collectors.toSet());
     }
 }

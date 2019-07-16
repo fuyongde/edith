@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.stark</groupId>
         <artifactId>edith-parent</artifactId>
-        <version>0.1.0</version>
+        <version>0.2.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>edith-core</artifactId>
@@ -19,6 +19,10 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
