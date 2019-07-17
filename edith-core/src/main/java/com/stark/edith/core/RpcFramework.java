@@ -3,6 +3,7 @@ package com.stark.edith.core;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.stark.edith.core.annotation.Service;
+import com.stark.edith.core.util.ArrayUtils;
 import com.stark.edith.core.util.StringUtils;
 import com.stark.edith.core.util.ThreadUtils;
 import org.reflections.Reflections;
@@ -38,7 +39,7 @@ public class RpcFramework {
     private static final String METHOD_NAME = "methodName";
 
     public static void export(String[] packageNames, int port) throws Exception {
-        if (Objects.isNull(packageNames) || packageNames.length == 0) {
+        if (ArrayUtils.isEmpty(packageNames)) {
             throw new IllegalArgumentException("PackageNames is empty");
         }
         if (port <= PORT_MIN || port > PORT_MAX) {
@@ -93,7 +94,6 @@ public class RpcFramework {
                     }
                 }
             });
-
         }
     }
 
