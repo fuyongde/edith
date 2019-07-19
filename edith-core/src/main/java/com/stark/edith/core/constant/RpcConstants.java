@@ -29,4 +29,12 @@ public interface RpcConstants {
      * 线程名称
      */
     String THREAD_NAME = "Edith-%d";
+
+    String ANYHOST_KEY = "anyhost";
+
+    String ANYHOST_VALUE = "0.0.0.0";
+
+    String LOCALHOST_KEY = "localhost";
+
+    String LOCALHOST_VALUE = "127.0.0.1";
 }

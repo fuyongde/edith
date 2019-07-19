@@ -1,0 +1,20 @@
+package com.stark.edith.core.util;
+
+import org.junit.Test;
+
+/**
+ * @author fuyongde
+ * @date 2019/7/19
+ */
+public class NetUtilsTest {
+
+    @Test
+    public void getRandomPort() {
+        System.out.println(NetUtils.getRandomPort());
+    }
+
+    @Test
+    public void getAvailablePort() {
+        System.out.println(NetUtils.getAvailablePort());
+    }
+}
