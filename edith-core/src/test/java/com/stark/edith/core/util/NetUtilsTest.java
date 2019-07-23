@@ -17,4 +17,9 @@ public class NetUtilsTest {
     public void getAvailablePort() {
         System.out.println(NetUtils.getAvailablePort());
     }
+
+    @Test
+    public void isInvalidPort() {
+        System.out.println(NetUtils.isInvalidPort(-1));
+    }
 }

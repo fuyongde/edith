@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import com.stark.edith.core.annotation.Service;
 import com.stark.edith.core.util.ArrayUtils;
+import com.stark.edith.core.util.NetUtils;
 import com.stark.edith.core.util.StringUtils;
 import com.stark.edith.core.util.ThreadUtils;
 import org.reflections.Reflections;
@@ -23,9 +24,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.stark.edith.core.constant.RpcConstants.PORT_MAX;
-import static com.stark.edith.core.constant.RpcConstants.PORT_MIN;
-
 /**
  * @author fuyongde
  * @date 2019/7/6 18:08
@@ -42,7 +40,7 @@ public class RpcFramework {
         if (ArrayUtils.isEmpty(packageNames)) {
             throw new IllegalArgumentException("PackageNames is empty");
         }
-        if (port <= PORT_MIN || port > PORT_MAX) {
+        if (NetUtils.isInvalidPort(port)) {
             throw new IllegalArgumentException("Invalid port " + port);
         }
         Set<Object> services = Optional
@@ -105,7 +103,7 @@ public class RpcFramework {
         if (StringUtils.isNullOrEmpty(host)) {
             throw new IllegalArgumentException("Host is null!");
         }
-        if (port <= PORT_MIN || port > PORT_MAX) {
+        if (NetUtils.isInvalidPort(port)) {
             throw new IllegalArgumentException("Invalid port " + port);
         }
         System.out.println("Get remote service " + interfaceClass.getName() + " from server " + host + ":" + port);
