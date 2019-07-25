@@ -22,4 +22,15 @@ public class NetUtilsTest {
     public void isInvalidPort() {
         System.out.println(NetUtils.isInvalidPort(-1));
     }
+
+    @Test
+    public void getLoopbackAddress() {
+        System.out.println(NetUtils.getLoopbackAddress());
+    }
+
+    @Test
+    public void getLocalHostLANAddress() {
+        System.out.println(NetUtils.getLocalHostLANAddress());
+    }
+
 }
